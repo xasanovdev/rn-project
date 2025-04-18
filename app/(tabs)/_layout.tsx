@@ -39,7 +39,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="activityA"
         options={{
-          title: "activity A",
+          title: "Search",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),
@@ -48,7 +48,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="activityB"
         options={{
-          title: "activity B",
+          title: "Profile",
           tabBarIcon: ({ color }) => (
             <IconSymbol size={28} name="paperplane.fill" color={color} />
           ),

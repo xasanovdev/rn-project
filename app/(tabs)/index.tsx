@@ -13,9 +13,11 @@ import {
 } from "react-native";
 import { router } from "expo-router";
 import BottomSheetDialog from "@/components/BottomSheet";
+import NotificationWithActions from "@/components/CustomToast";
+import Toast from "react-native-toast-message";
 
 // Custom Toast component for web
-const Toast = ({ visible, message, onDismiss }) => {
+const Toast2 = ({ visible, message, onDismiss }) => {
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(() => {
@@ -91,6 +93,14 @@ export default function TasksScreen() {
     outputRange: ["0deg", "360deg"],
   });
 
+  const showNotification = () => {
+    Toast.show({
+      type: "success",
+      text1: "Hello 👋",
+      text2: "This is a simple notification",
+    });
+  };
+
   // 3. ClickListener for RecyclerView items
   const handleItemClick = (item: { id: string; name: string }) => {
     showToast(`Clicked: ${item.name}`, setToastVisible, setToastMessage);
@@ -100,7 +110,7 @@ export default function TasksScreen() {
     <View style={styles.container}>
       {/* Web toast component */}
       {Platform.OS === "web" && (
-        <Toast
+        <Toast2
           visible={toastVisible}
           message={toastMessage}
           onDismiss={() => setToastVisible(false)}
@@ -111,8 +121,15 @@ export default function TasksScreen() {
 
       {/* Task 1: Bottom Sheet Dialog */}
       <TouchableOpacity style={styles.button} onPress={toggleBottomSheet}>
-        <Text style={styles.buttonText}>Show Bottom Sheet Menu</Text>
+        <Text style={styles.buttonText}>Show Menu</Text>
       </TouchableOpacity>
+
+      <View style={{ display: "flex", gap: 16 }}>
+        <NotificationWithActions />
+        <TouchableOpacity style={styles.button} onPress={showNotification}>
+          <Text style={styles.buttonText}>Show Notification</Text>
+        </TouchableOpacity>
+      </View>
 
       <BottomSheetDialog
         isVisible={isBottomSheetVisible}
@@ -149,26 +166,6 @@ export default function TasksScreen() {
         </View>
       </BottomSheetDialog>
 
-      {/* Task 2: Rotating Image with ObjectAnimator */}
-      <View style={styles.imageContainer}>
-        <Animated.Image
-          source={{
-            uri: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJ7fTFb3G8JZJy_oWg4rfoketLxdUnUF2eLw&s",
-          }}
-          alt={"Helloworld"}
-          style={[styles.image, { transform: [{ rotate: rotation }] }]}
-        />
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => {
-            rotateImage();
-            showToast("Image rotating", setToastVisible, setToastMessage);
-          }}
-        >
-          <Text style={styles.buttonText}>Rotate Image</Text>
-        </TouchableOpacity>
-      </View>
-
       {/* Task 3: RecyclerView with ClickListener */}
       <Text style={styles.sectionTitle}>RecyclerView Items:</Text>
       <FlatList
@@ -183,21 +180,6 @@ export default function TasksScreen() {
         )}
         keyExtractor={(item) => item.id}
       />
-
-      {/* Task 4: Navigate to ActivityA for Bundle example */}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => {
-          router.push("/activityA");
-          showToast(
-            "Navigating to Activity A",
-            setToastVisible,
-            setToastMessage,
-          );
-        }}
-      >
-        <Text style={styles.buttonText}>Go to Activity A (Bundle Example)</Text>
-      </TouchableOpacity>
     </View>
   );
 }
