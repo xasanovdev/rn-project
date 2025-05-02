@@ -1,21 +1,23 @@
 void main() {
-  // Using default constructor
-  var car1 = Car('Toyota', 'Camry', 2021);
-  car1.displayInfo();
-
-  // Using named constructor
-  var car2 = Car.fromMap({'brand': 'BMW', 'model': 'X6', 'year': 2022});
-  car2.displayInfo();
-
-  // Using redirecting constructor
-  var car3 = Car.latest('Tesla', 'Model Y');
-  car3.displayInfo();
-
-  // Using named constructor with default values
-  var car4 = Car.unknown();
-  car4.displayInfo();
-
-  // Using factory constructor
-  var car5 = Car.factoryCar('sports');
-  car5.displayInfo();
+  // Create a sports car using factory constructor
+  var ferrari = Car.factoryCar('sports');
+  ferrari.displayInfo();
+  
+  // Calculate car value and efficiency
+  print('Estimated value: \$${ferrari.calculateApproximateValue()}');
+  print('Fuel efficiency: ${ferrari.getFuelEfficiency()} km/L');
+  print('CO2 emissions: ${ferrari.getCO2Emission()} g/km');
+  
+  // Create an electric car
+  var tesla = Car.electric(
+    'Tesla', 
+    'Model Y', 
+    2023,
+    batteryCapacity: 75,
+    range: 505,
+    chargingTime: 30,
+    horsePower: 450,
+    vin: 'TSLA202304567'
+  );
+  tesla.displayInfo();
 }
