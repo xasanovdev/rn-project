@@ -1,144 +1,114 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  ActivityIndicator,
-  StyleSheet,
-  SafeAreaView,
-  Alert,
-  Animated,
-} from "react-native";
+import React, { useState } from "react";
+import { View, Text, Button, TextInput, FlatList } from "react-native";
+import MapView, { Marker } from "react-native-maps";
 
-export default function PublicCategoryList() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+export default function App() {
+  // In-memory array for CRUD operations
+  const [items, setItems] = useState<
+    { id: number; title: string; latitude: number; longitude: number }[]
+  >([]);
+  const [newItem, setNewItem] = useState("");
+  const [currentLat, setCurrentLat] = useState(37.78825); // Default lat
+  const [currentLong, setCurrentLong] = useState(-122.4324); // Default long
 
-  const fetchUsers = async () => {
-    try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/users",
-      );
-      const data = await response.json();
-      setUsers(data);
-    } catch (error) {
-      Alert.alert("Error", "Failed to fetch data.");
-    } finally {
-      setLoading(false);
-    }
+  // Add item to the array with coordinates
+  const addItem = () => {
+    if (newItem.trim() === "") return;
+    setItems((prevItems) => [
+      ...prevItems,
+      {
+        id: Math.random(),
+        title: newItem,
+        latitude: currentLat,
+        longitude: currentLong,
+      },
+    ]);
+    setNewItem("");
   };
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
+  // Delete item from the array
+  const deleteItem = (id: number) => {
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  };
 
-  // Shimmer effect
-  const shimmerTranslate = new Animated.Value(-1);
-  useEffect(() => {
-    Animated.loop(
-      Animated.timing(shimmerTranslate, {
-        toValue: 1,
-        duration: 1500,
-        useNativeDriver: true,
-      }),
-    ).start();
-  }, []);
+  // Update item title
+  const updateItem = (id: number, newTitle: string) => {
+    setItems((prevItems) =>
+      prevItems.map((item) =>
+        item.id === id ? { ...item, title: newTitle } : item
+      )
+    );
+  };
 
-  const ShimmerItem = () => (
-    <View style={styles.item}>
-      <Animated.View
-        style={[
-          styles.shimmerBox,
-          {
-            transform: [
-              {
-                translateX: shimmerTranslate.interpolate({
-                  inputRange: [-1, 1],
-                  outputRange: [-300, 300],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
-      <Animated.View
-        style={[
-          styles.shimmerBox,
-          {
-            transform: [
-              {
-                translateX: shimmerTranslate.interpolate({
-                  inputRange: [-1, 1],
-                  outputRange: [-300, 300],
-                }),
-              },
-            ],
-          },
-        ]}
-      />
-    </View>
-  );
+  // Handle map press to get new coordinates
+  const handleMapPress = (e: any) => {
+    const { latitude, longitude } = e.nativeEvent.coordinate;
+    setCurrentLat(latitude);
+    setCurrentLong(longitude);
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Categories (Users)</Text>
-      {loading ? (
-        <FlatList
-          data={[1, 2, 3, 4, 5]} // Placeholder items for shimmer effect
-          keyExtractor={(item) => item.toString()}
-          renderItem={() => <ShimmerItem />}
-        />
-      ) : (
-        <FlatList
-          data={users}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.item}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.email}>{item.email}</Text>
-              <Text style={styles.username}>@{item.username}</Text>
-            </View>
-          )}
-        />
-      )}
+    <View style={{ flex: 1 }}>
+      {/* Google Map View */}
+      <MapView
+        style={{ flex: 1 }}
+        provider="google"
+        initialRegion={{
+          latitude: currentLat,
+          longitude: currentLong,
+          latitudeDelta: 0.0922,
+          longitudeDelta: 0.0421,
+        }}
+        onPress={handleMapPress}
+      >
+        {items.map((item) => (
+          <Marker
+            key={item.id}
+            coordinate={{ latitude: item.latitude, longitude: item.longitude }}
+            title={item.title}
+            description={`ID: ${item.id}`}
+          />
+        ))}
+      </MapView>
+
+      {/* Input for adding new items */}
+      <TextInput
+        value={newItem}
+        onChangeText={setNewItem}
+        placeholder="Enter new item"
+        style={{
+          height: 40,
+          borderColor: "gray",
+          borderWidth: 1,
+          marginBottom: 10,
+          paddingLeft: 8,
+        }}
+      />
+      <Button title="Add Item" onPress={addItem} />
+
+      {/* FlatList to display CRUD items */}
+      <FlatList
+        data={items}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 10,
+            }}
+          >
+            <Text style={{ flex: 1 }}>{item.title}</Text>
+            <Button title="Delete" onPress={() => deleteItem(item.id)} />
+            <Button
+              title="Update"
+              onPress={() =>
+                updateItem(item.id, prompt("Enter new title:") || item.title)
+              }
+            />
+          </View>
+        )}
+      />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: "#fff",
-  },
-  header: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 12,
-  },
-  item: {
-    padding: 12,
-    backgroundColor: "#f0f0f0",
-    borderRadius: 8,
-    marginBottom: 10,
-  },
-  name: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  email: {
-    fontSize: 14,
-    color: "#555",
-  },
-  username: {
-    fontSize: 14,
-    color: "#888",
-  },
-  shimmerBox: {
-    height: 12,
-    width: "80%",
-    backgroundColor: "#e0e0e0",
-    marginBottom: 6,
-    borderRadius: 4,
-  },
-});
