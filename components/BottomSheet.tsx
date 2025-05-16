@@ -52,10 +52,10 @@ export default function SideMenuDialog({ isVisible, onClose }) {
                 <Text style={styles.menuText}>Profile</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuButton}>
-                <Text style={styles.menuText}>Messages</Text>
+                <Text style={styles.menuText}>Settings</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.menuButton}>
-                <Text style={styles.menuText}>Settings</Text>
+                <Text style={styles.menuText}>Logout</Text>
               </TouchableOpacity>
             </Animated.View>
           </TouchableWithoutFeedback>

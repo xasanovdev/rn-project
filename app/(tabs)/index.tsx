@@ -10,6 +10,7 @@ import {
   ToastAndroid,
   Platform,
   Alert,
+  Modal,
 } from "react-native";
 import { router } from "expo-router";
 import BottomSheetDialog from "@/components/BottomSheet";
@@ -40,7 +41,7 @@ const Toast2 = ({ visible, message, onDismiss }) => {
 const showToast = (
   message: string,
   setToastVisible: (visible: boolean) => void,
-  setToastMessage: (message: string) => void,
+  setToastMessage: (message: string) => void
 ) => {
   if (Platform.OS === "android") {
     ToastAndroid.show(message, ToastAndroid.SHORT);
@@ -59,9 +60,13 @@ export default function TasksScreen() {
   const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
   const rotationAnim = useRef(new Animated.Value(0)).current;
 
+  const [count, setCount] = useState(0);
+
   // State for web toast
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   // Sample data for RecyclerView (FlatList in React Native)
   const items = [
@@ -119,17 +124,55 @@ export default function TasksScreen() {
 
       <Text style={styles.header}>Mobile Development Tasks</Text>
 
+      <View style={styles.counterContainer}>
+        <TouchableOpacity
+          style={styles.counterButton}
+          onPress={() => setCount(count - 1)}
+        >
+          <Text style={styles.counterButtonText}>-</Text>
+        </TouchableOpacity>
+
+        <Text style={styles.counterValue}>{count}</Text>
+
+        <TouchableOpacity
+          style={styles.counterButton}
+          onPress={() => setCount(count + 1)}
+        >
+          <Text style={styles.counterButtonText}>+</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Task 1: Bottom Sheet Dialog */}
       <TouchableOpacity style={styles.button} onPress={toggleBottomSheet}>
         <Text style={styles.buttonText}>Show Menu</Text>
       </TouchableOpacity>
 
-      <View style={{ display: "flex", gap: 16 }}>
-        <NotificationWithActions />
-        <TouchableOpacity style={styles.button} onPress={showNotification}>
-          <Text style={styles.buttonText}>Show Notification</Text>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.buttonText}>Open Bottom Sheet</Text>
+      </TouchableOpacity>
+
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPressOut={() => setModalVisible(false)}
+        >
+          <View style={styles.bottomSheet}>
+            <Text style={styles.bottomSheetText}>This is a bottom sheet!</Text>
+            <TouchableOpacity onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
         </TouchableOpacity>
-      </View>
+      </Modal>
 
       <BottomSheetDialog
         isVisible={isBottomSheetVisible}
@@ -165,21 +208,6 @@ export default function TasksScreen() {
           </TouchableOpacity>
         </View>
       </BottomSheetDialog>
-
-      {/* Task 3: RecyclerView with ClickListener */}
-      <Text style={styles.sectionTitle}>RecyclerView Items:</Text>
-      <FlatList
-        data={items}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.listItem}
-            onPress={() => handleItemClick(item)}
-          >
-            <Text>{item.name}</Text>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id}
-      />
     </View>
   );
 }
@@ -257,6 +285,57 @@ const styles = StyleSheet.create({
   },
   toastText: {
     color: "white",
+    fontSize: 16,
+  },
+  counterContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+
+  counterButton: {
+    backgroundColor: "#2196F3",
+    padding: 12,
+    borderRadius: 50,
+    marginHorizontal: 20,
+    width: 50,
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  counterButtonText: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+
+  counterValue: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+  },
+
+  bottomSheet: {
+    backgroundColor: "#fff",
+    padding: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+
+  bottomSheetText: {
+    fontSize: 18,
+    marginBottom: 20,
+  },
+
+  closeText: {
+    color: "#2196F3",
+    fontWeight: "bold",
     fontSize: 16,
   },
 });
